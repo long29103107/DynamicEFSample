@@ -20,8 +20,8 @@ public class ValuesController : ControllerBase
     [HttpGet]
     public IActionResult Get(int categoryId, int productDetailId)
     {
-        string productFilter = $"ProductDetailId == {productDetailId}"; 
-        string categoryFilter = $"CategoryId == {categoryId}";
+        string productFilter = $"ProductDetailResponse.ProductDetailId == {productDetailId}"; 
+        string categoryFilter = $"CategoryResponse.CategoryId == {categoryId}";
 
         IQueryable<ProductResponse> query = default;
 
@@ -29,42 +29,54 @@ public class ValuesController : ControllerBase
         {
                 ProductId = p.ProductId,
                 ProductName = p.Name,
-                CategoryId = p.CategoryId,
-                CategoryName = "N/A", // Default for Category
+                CategoryResponse = new CategoryResponse()
+                {
+                    CategoryId = p.CategoryId,
+                    CategoryName = "N/A", // Default for Category
+                }
             })
             .AsQueryable();
 
         if (categoryId != 0)
         {
             query = query.Join(
-                _context.Categories.Where(categoryFilter),
-                p => p.CategoryId,
+                _context.Categories,
+                p => p.CategoryResponse.CategoryId,
                 c => c.CategoryId,
                 (p, c) => new ProductResponse
                 {
                     ProductId = p.ProductId,
                     ProductName = p.ProductName,
-                    CategoryName = c.Name,
-                    CategoryId = c.CategoryId
+                    CategoryResponse = new CategoryResponse()
+                    {
+                        CategoryId = p.CategoryResponse.CategoryId,
+                        CategoryName = "N/A", // Default for Category
+                    }
                 }
-            ).AsQueryable();
+            ).Where(categoryFilter).AsQueryable();
         }
 
         if (productDetailId != 0)
         {
             query = query.Join(
-                _context.ProductDetails.Where(productFilter),
+                _context.ProductDetails,
                 p => p.ProductId,
                 c => c.ProductId,
                 (p, c) => new ProductResponse
                 {
                     ProductId = p.ProductId,
                     ProductName = p.ProductName,
-                    CategoryName = p.CategoryName,
-                    CategoryId = p.CategoryId,
-                    ProductDetailId = c.ProductDetailId
+                    CategoryResponse = new CategoryResponse()
+                    {
+                        CategoryId = p.CategoryResponse.CategoryId,
+                        CategoryName = "N/A", // Default for Category
+                    },
+                    ProductDetailResponse = new ProductDetailResponse()
+                    {
+                        ProductDetailId = c.ProductDetailId,
+                    }
                 }
-            ).AsQueryable();
+            ).Where(productFilter).AsQueryable();
         }
 
         return Ok(query.ToList());
