@@ -1,4 +1,4 @@
-﻿namespace Product.Api;
+﻿namespace Product.OriginalEF.Api;
 
 public class ProductResponse
 {
@@ -17,5 +17,5 @@ public class CategoryResponse
 
 public class ProductDetailResponse
 {
-    public int? ProductDetailId { get; set; }
+    public int ProductDetailId { get; set; }
 }
