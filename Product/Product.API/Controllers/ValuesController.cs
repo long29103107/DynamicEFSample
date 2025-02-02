@@ -87,29 +87,4 @@ public class ValuesController : ControllerBase
 
         return Ok(result);
     }
-
-    public Dictionary<string, object> GetPropertiesAsDictionary<T>(T obj)
-    {
-        var dictionary = new Dictionary<string, object>();
-        foreach (PropertyInfo property in typeof(T).GetProperties())
-        {
-            object value = property.GetValue(obj);
-            if (value != null && !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string))
-            {
-                // Nếu là đối tượng không phải primitive, đệ quy vào
-                var nestedProperties = GetPropertiesAsDictionary(value);
-                foreach (var nestedKvp in nestedProperties)
-                {
-                    dictionary[$"{property.Name}.{nestedKvp.Key}"] = nestedKvp.Value; // Thêm thuộc tính theo định dạng
-                }
-            }
-            else
-            {
-                // Nếu là primitive hoặc string
-                dictionary[property.Name] = value;
-            }
-        }
-        return dictionary;
-    }
-
 }
